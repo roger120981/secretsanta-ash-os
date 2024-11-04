@@ -1,0 +1,42 @@
+<header class="px-4 sm:px-6 lg:px-8">
+  <div class="flex items-center justify-between border-b border-zinc-100 py-3 text-sm">
+    <div class="flex items-center gap-4 text-brand text-sm font-semibold">
+      <a href="/">
+        <h3>SecretSanta</h3>
+      </a>
+      <p class="bg-brand/5 text-brand rounded-full px-2 font-medium leading-6">
+        v<%= Application.spec(:secret_santa, :vsn) %>
+      </p>
+    </div>
+    <div class="flex items-center gap-4 font-semibold leading-6 text-zinc-900">
+      <%= if !is_nil(@current_account) do %>
+        <%= if !is_nil(@current_account.user_profile) do %>
+        <span class="px-3 py-2 text-sm font-medium text-brand rounded-md">
+          <%= "#{@current_account.user_profile.name}" %>
+        </span>
+        -
+        <% end %>
+      <span class="px-3 py-2 text-sm font-medium text-brand rounded-md">
+        <%= "#{@current_account.email}" %>
+      </span>
+      <a href={~p"/a/sign-out"}
+        class="rounded-lg bg-zinc-100 px-2 py-1 text-[0.8125rem] font-semibold leading-6 text-zinc-900 hover:bg-zinc-200/80 active:text-zinc-900/70"
+        >
+        Sign out
+      </a>
+      <% else %>
+      <a href={~p"/a/sign-in"}
+        class="rounded-lg bg-zinc-100 px-2 py-1 text-[0.8125rem] font-semibold leading-6 text-zinc-900 hover:bg-zinc-200/80 active:text-zinc-900/70"
+        >
+        Sign in
+      </a>
+      <% end %>
+    </div>
+  </div>
+</header>
+<main class="px-4 py-20 sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-2xl">
+    <.flash_group flash={@flash} />
+    <%= @inner_content %>
+  </div>
+</main>

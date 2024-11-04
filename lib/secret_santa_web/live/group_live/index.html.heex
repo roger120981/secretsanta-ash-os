@@ -1,0 +1,16 @@
+<h2>Dina grupper</h2>
+<ul
+  id="groups"
+  phx-update="stream"
+  class="flex flex-col space-y-0.5"
+  >
+  <li
+    :for={{dom_id, group} <- @streams.groups}
+    id={dom_id}
+    class="flex"
+  >
+    <.link patch={~p"/groups/#{group.id}"} class="rounded-lg bg-brand/5 px-2 py-1 hover:bg-zinc-200/80">
+      <p class="text-brand"><%= group.name %></p>
+    </.link>
+  </li>
+</ul>

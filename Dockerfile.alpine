@@ -1,0 +1,178 @@
+# The version of Alpine to use for the final image
+# This should match the version of Alpine that the `elixir:1.7.2-alpine` image uses
+ARG ALPINE_VERSION=3.20
+
+FROM erlang:27.1.2-alpine AS elixir-builder-alpine
+
+# elixir expects utf8.
+ENV ELIXIR_VERSION="v1.17.3"
+ARG ELIXIR_SHA256SUM="6116c14d5e61ec301240cebeacbf9e97125a4d45cd9071e65e0b958d5ebf3890"
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+
+RUN set -xe \
+	&& buildDeps=' \
+		ca-certificates \
+		curl \
+		make \
+    build-base \
+    openssl \
+	' \
+  && apk upgrade --no-cache \
+	&& apk add --no-cache --virtual .build-deps $buildDeps
+
+RUN set -xe \
+	&& ELIXIR_DOWNLOAD_URL="https://github.com/elixir-lang/elixir/archive/${ELIXIR_VERSION}.tar.gz" \
+	&& ELIXIR_DOWNLOAD_SHA256="${ELIXIR_SHA256SUM}" \
+  && curl -fSL -o elixir-src.tar.gz $ELIXIR_DOWNLOAD_URL \
+	&& echo "$ELIXIR_DOWNLOAD_SHA256  elixir-src.tar.gz" | sha256sum -c -
+
+RUN set -xe \
+	&& mkdir -p /usr/local/src/elixir \
+	&& tar -xzC /usr/local/src/elixir --strip-components=1 -f elixir-src.tar.gz \
+	&& rm elixir-src.tar.gz \
+	&& cd /usr/local/src/elixir \
+	&& make install clean \
+  && mix local.rebar --force \
+  && mix local.hex --force \
+  && rm -r /usr/local/src
+
+CMD ["iex"]
+
+FROM elixir-builder-alpine AS builder
+
+# By convention, /opt is typically used for applications
+
+# This step installs all the build tools we'll need
+RUN apk update && \
+  apk upgrade --no-cache && \
+  apk add --no-cache \
+    build-base \
+    git \
+    libstdc++ \
+    npm \
+    openssh-client \
+    openssl-dev
+
+RUN mkdir -p /usr/include/sys
+RUN ln -s /usr/include/unistd.h /usr/include/sys/unistd.h
+
+RUN mkdir /opt/app
+
+WORKDIR /opt/app
+
+# ENV GIT_SSH_COMMAND='ssh -i /app/.ssh/id -o "StrictHostKeyChecking=no"'
+# COPY ci/cicd-key ./.ssh/id
+
+ENV MIX_ENV=test
+
+# Install dependencies
+COPY VERSION ./VERSION
+COPY mix.exs mix.lock ./
+RUN mix deps.get
+
+# copy configuration
+COPY config ./config/
+RUN mix deps.compile
+
+# Workaround for picosat
+# https://stackoverflow.com/questions/52894632/cannot-install-pycosat-on-alpine-during-dockerizing
+# RUN echo "#include <unistd.h>" > /usr/include/sys/unistd.h
+
+# The environment to build with
+ARG MIX_ENV=prod
+
+# This copies our app source code into the build container
+ENV MIX_ENV=${MIX_ENV}
+
+# COPY cicd-key /opt/app/.ssh/id
+RUN ssh-keyscan -t rsa github.com >> /etc/ssh/ssh_known_hosts
+
+RUN chown -R nobody:nobody /opt
+
+USER nobody:nobody
+
+ENV HOME=/opt/app
+
+ENV GIT_SSH_COMMAND='ssh -i /opt/app/.ssh/id -o "StrictHostKeyChecking=no"'
+
+RUN mix local.rebar --force \
+    && mix local.hex --force
+
+# COPY ./.git ./.git
+
+COPY ./config/config.*exs ./config/
+COPY ./config/${MIX_ENV}.exs ./config/${MIX_ENV}.exs
+
+COPY mix.exs ./
+COPY mix.lock ./
+COPY VERSION ./
+
+RUN mix do deps.get --only ${MIX_ENV}, deps.compile
+
+COPY ./lib ./lib
+COPY ./priv ./priv
+
+ARG GIT_VERSION_SHA
+ENV GIT_VERSION_SHA=${GIT_VERSION_SHA}
+
+RUN mix compile
+
+# The following are build arguments used to change variable parts of the image.
+# The name of your application/release (required)
+ARG REL_NAME="secret_santa"
+
+COPY ./config/runtime.exs ./config/runtime.exs
+
+COPY .git/HEAD .git/
+COPY .git/refs .git/refs/
+COPY ./minimal-git-sha.sh ./minimal-git-sha.sh
+
+ENV REL_NAME=${REL_NAME}
+
+RUN export GIT_VERSION_SHA=$(exec ./minimal-git-sha.sh)
+
+RUN mkdir -p /opt/built && \
+  mix release ${REL_NAME}
+
+RUN \
+  # GIT_VERSION_SHA="${GIT_VERSION_SHA:-$(cat .git/HEAD | awk '{print ".git/"$2}' | xargs cat | head -c 8)}" \
+  VERSION=$(mix santa.print_version) && \
+  TAR_FILE=${REL_NAME}-${VERSION}.tar.gz && \
+  cp _build/${MIX_ENV}/${TAR_FILE} /opt/built && \
+  cd /opt/built && \
+  tar -xzf ${TAR_FILE} && \
+  chmod -R 755 ./bin && \
+  rm ${TAR_FILE}
+
+# From this line onwards, we're in a new image, which will be the image used in production
+FROM alpine:${ALPINE_VERSION}
+
+ARG REL_NAME
+
+RUN apk update && \
+    apk add --no-cache \
+      bash \
+      libgcc \
+      libstdc++ \
+      openssl \
+      tini
+
+WORKDIR /app
+
+RUN chown nobody:nobody /app
+
+USER nobody:nobody
+
+COPY --from=builder --chown=nobody:nobody /opt/built .
+
+ENV REPLACE_OS_VARS=true
+ENV REL_NAME=${REL_NAME}
+ENV HOME=/app
+ENV PORT=8080
+
+COPY entrypoint.sh ./entrypoint.sh
+
+ENTRYPOINT ["tini", "--", "./entrypoint.sh"]
+CMD ["start"]

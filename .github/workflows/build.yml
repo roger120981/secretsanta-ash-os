@@ -1,0 +1,32 @@
+name: Build
+
+on:
+  workflow_call:
+    inputs:
+      build_env:
+        required: true
+        type: string
+
+permissions:
+  checks: write
+  contents: read
+
+jobs:
+  build:
+    name: Build
+    runs-on: self-hosted
+    concurrency:
+      group: ${{ inputs.build_env }}-${{ github.ref }}
+      cancel-in-progress: false
+    env:
+      MIX_ENV: ${{ inputs.build_env }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: simpers/base64-to-file@dev
+      with:
+        input: ${{ secrets.CICD_KEY }}
+        output_filename: './cicd-key'
+    - uses: ./.github/actions/restore-or-build
+      name: "Restore or build"
+      with:
+        build_env: ${{ inputs.build_env }}

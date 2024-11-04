@@ -1,0 +1,39 @@
+name: Pull Request checks
+
+on:
+  pull_request:
+    branches:
+    - dev
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build_dev:
+    uses: ./.github/workflows/build.yml
+    with:
+      build_env: dev
+  build_test:
+    uses: ./.github/workflows/build.yml
+    with:
+      build_env: test
+  checks:
+    needs: build_dev
+    uses: ./.github/workflows/checks.yml
+  tests:
+    needs: build_test
+    environment: test
+    runs-on: self-hosted
+    steps:
+    - uses: actions/checkout@v4
+    - name: Restore Test
+      id: restore-deps
+      uses: ./.github/actions/restore-or-build
+      with:
+        build_env: "test"
+    - uses: ./.github/actions/elixir-tests
+      name: Run tests
+      with:
+        test_command: "test"

@@ -1,0 +1,25 @@
+<.flash_group flash={@flash} />
+<div class="px-4 py-10 sm:px-6 sm:py-28 lg:px-8 xl:px-28 xl:py-32">
+  <div class="mx-auto max-w-xl lg:mx-0">
+    <h1 class="text-brand mt-10 flex items-center text-sm font-semibold leading-6">
+      SecretSanta
+      <span></span>
+      <small class="bg-brand/5 text-[0.8125rem] ml-3 rounded-full px-2 font-medium leading-6">
+        v<%= Application.spec(:secret_santa, :vsn) %>
+      </small>
+    </h1>
+    <p class="text-[2rem] mt-4 font-semibold leading-10 tracking-tighter text-brand">
+      Tomten är här!
+    </p>
+    <p class="mt-4 font-bold text-base leading-7 text-accento/60">
+      Hur enkelt som helst!
+    </p>
+    <div class="flex flex-row text-brand/50 justify-items-center place-content-center">
+      <%= if is_nil(@current_account) do %>
+      <.link href={~p"/a/sign-in"} class="rounded-lg bg-brand/5 px-2 py-1 hover:bg-zinc-200/80">
+        Logga in!
+      </.link>
+      <% end %>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,20 @@
+<.header>
+  <%= @group.name %>
+  <:subtitle><%= @group.desc %></:subtitle>
+  <:actions>
+    <.link patch={~p"/groups/#{@group}/show/edit"} phx-click={JS.push_focus()}>
+      <.button class="bg-brand/5">Edit</.button>
+    </.link>
+  </:actions>
+</.header>
+<.list>
+  <:item title="Namn"><%= @group.name %></:item>
+  <:item title="Beskrivning"><%= @group.desc %></:item>
+  <:item title="Budget"><%= format_budget(@group.budget) %></:item>
+  <:item title="Deltagare">
+    <.list :for={participant <- sorted_by(@group.participants, :name)}>
+      <:item title={participant.name}><%= participant.name %></:item>
+    </.list>
+  </:item>
+</.list>
+
