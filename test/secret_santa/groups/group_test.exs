@@ -17,7 +17,7 @@ defmodule SecretSanta.Groups.GroupTest do
 
   describe "Groups.create!" do
     @tag feature: :groups, lead?: true
-    test "create works without inviting", %{lead: user = %Account{user_profile: profile = %{id: profile_id}}} do
+    test "create works without inviting", %{lead: user = %Account{user_profile: _profile = %{id: profile_id}}} do
       args = %{
         name: Faker.Team.creature(),
       }

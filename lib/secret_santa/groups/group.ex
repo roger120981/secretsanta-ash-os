@@ -19,7 +19,7 @@ defmodule SecretSanta.Groups.Group do
   use Repeated.SoftDelete
   use Repeated.Timestamps
 
-  alias SecretSanta.Changes.AppendLeadAsParticipant, as: AddLeadToParticipants
+  # alias SecretSanta.Changes.AppendLeadAsParticipant
   alias SecretSanta.Changes.ShuffleGroup
   alias SecretSanta.Groups.Budget
   alias SecretSanta.Groups.UserGroup
@@ -42,11 +42,11 @@ defmodule SecretSanta.Groups.Group do
 
   actions do
     get_by_id prepare: [
-      load: [:lead_santa, :user_groups, :participants]
+      load: [:lead_santa, :all_users, :participants]
     ]
 
     list_actions prepare: [
-      load: [:lead_santa, :user_groups, :participants, :rejections]
+      load: [:lead_santa, :all_users, :participants, :rejections]
     ]
 
     soft_delete()
@@ -55,14 +55,14 @@ defmodule SecretSanta.Groups.Group do
       primary? true
       accept @accept_create
 
-      argument :participants, {:array, :map} do
+      argument :invited_users, {:array, :map} do
         allow_nil? false
         default []
       end
 
       change relate_actor(:lead_santa, allow_nil?: false, field: :user_profile)
-      change manage_relationship(:participants, :user_groups, type: :create)
-      change AddLeadToParticipants
+      change manage_relationship(:invited_users, :participants, @manage_participants_relationship)
+      # change AppendLeadToParticipants
     end
 
     read :read do
@@ -79,7 +79,7 @@ defmodule SecretSanta.Groups.Group do
 
       argument :participants, {:array, :map}, allow_nil?: false
 
-      change manage_relationship(:participants, :user_groups, @manage_participants_relationship)
+      change manage_relationship(:participants, :all_users, @manage_participants_relationship)
     end
 
     update :invite_participants_by_ids do
@@ -87,7 +87,7 @@ defmodule SecretSanta.Groups.Group do
 
       argument :ids, {:array, :nanoid}, allow_nil?: false
 
-      change manage_relationship(:ids, :user_groups, @manage_participants_relationship)
+      change manage_relationship(:ids, :all_users, @manage_participants_relationship)
     end
 
     update :uninvite_participants do
@@ -95,7 +95,7 @@ defmodule SecretSanta.Groups.Group do
 
       argument :participants, {:array, :map}, allow_nil?: false
 
-      change manage_relationship(:participants, :user_groups, type: :remove)
+      change manage_relationship(:participants, :all_users, type: :remove)
     end
 
     update :uninvite_participants_by_ids do
@@ -103,7 +103,7 @@ defmodule SecretSanta.Groups.Group do
 
       argument :ids, {:array, :nanoid}, allow_nil?: false
 
-      change manage_relationship(:ids, :user_groups, type: :remove)
+      change manage_relationship(:ids, :all_users, type: :remove)
     end
 
     update :shuffle do
@@ -175,7 +175,7 @@ defmodule SecretSanta.Groups.Group do
       allow_nil? false
     end
 
-    has_many :user_groups, UserGroup do
+    has_many :all_users, UserGroup do
       public? true
       description """
         The user-association relationship underlying all many-to-many
@@ -187,28 +187,21 @@ defmodule SecretSanta.Groups.Group do
 
     many_to_many :participants, UserProfile do
       public? true
-      # through UserGroup
-      join_relationship :user_groups
+      join_relationship :all_users
 
       source_attribute_on_join_resource :group_id
       destination_attribute_on_join_resource :user_id
 
-      filter expr(not is_nil(parent(user_groups.accepted_at)))
-
-      # sort name: :asc
+      filter expr(not is_nil(parent(all_users.accepted_at)))
     end
 
     many_to_many :rejections, UserProfile do
       public? true
-      through UserGroup
-      # join_relationship :user_groups
+      join_relationship :all_users
 
       source_attribute_on_join_resource :group_id
       destination_attribute_on_join_resource :user_id
-
-      # filter expr(not is_nil(parent(user_groups.rejected_at)))
-
-      # sort name: :asc
+      filter expr(not is_nil(parent(all_users.rejected_at)))
     end
   end
 
@@ -219,7 +212,7 @@ defmodule SecretSanta.Groups.Group do
     end
 
     policy action_type(:read) do
-      # authorize_if relates_to_actor_via(:lead_santa, field: :user_profile)
+      authorize_if relates_to_actor_via(:lead_santa, field: :user_profile)
       authorize_if relates_to_actor_via(:participants, field: :user_profile)
     end
 

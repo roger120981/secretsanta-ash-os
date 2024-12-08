@@ -48,5 +48,5 @@ assets/css/_components.css
 /.elixir_ls/
 /ci/cicd-key
 /ci/cicd-key.pub
-/**/*secret*
+/**/*secret*.ex
 /**secrets**/*
