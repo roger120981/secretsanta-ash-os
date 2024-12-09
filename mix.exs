@@ -113,8 +113,13 @@ defmodule SecretSanta.MixProject do
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
 
-      # overrides that aren't actual deps
-      # {:sourceror, "~> 0.14", override: true},
+      # OpenTelmetry
+      {:opentelemetry, "~> 1.5"},
+      {:opentelemetry_api, "~> 1.2"},
+      {:opentelemetry_bandit, "~> 0.2"},
+      {:opentelemetry_exporter, "~> 1.6"},
+      {:opentelemetry_phoenix, "~> 2.0"},
+      {:opentelemetry_ecto, "~> 1.2"},
 
       # tools
       {:credo, "~> 1.7", only: :dev},

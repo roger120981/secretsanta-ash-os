@@ -30,8 +30,6 @@ FULL_TAG="ss-api:${PROJECT_VERSION}-${TAG_SUFFIX}"
 
 echo "Building ${FULL_TAG}"
 
-exit 1
-
 docker build --progress=plain \
   -t "${FULL_TAG}" \
   -f "${DOCKERFILE}" \
