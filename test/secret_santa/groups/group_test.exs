@@ -40,21 +40,30 @@ defmodule SecretSanta.Groups.GroupTest do
       #   ],
       #   rejections: [],
       # } = Groups.create_group!(args, actor: user)
-      group = %Group{id: group_id} = Groups.create_group!(args, actor: user)
 
-      group = Groups.get_group_by_id!(group_id, actor: user)
+      created_group =
+        %Group{id: group_id, group_size: group_size, participants: participants}
+          = Groups.create_group!(args, actor: user)
 
-      assert group.name == args[:name]
-      assert group.lead_santa_id == profile_id
-      assert {:ok, _group} = Groups.get_group_by_id(group.id, actor: user)
-      assert {:ok, [_group]} = Groups.list_groups(authorize?: false)
+      actual_group_size = Enum.count(participants)
+      assert created_group.name == args[:name]
+      assert created_group.lead_santa_id == profile_id
+      assert actual_group_size == group_size,
+        "the number of participants and group_size are not equal: #{actual_group_size} != #{group_size}"
+      assert group_size == 1,
+        "expected lead and only lead to be a participant, but got #{group_size} participants"
+
+      refetched_group = Groups.get_group_by_id!(group_id, actor: user)
+
+      assert {:ok, _group} = Groups.get_group_by_id(group_id, actor: user)
+      assert {:ok, [%Group{id: ^group_id}]} = Groups.list_groups(actor: user)
     end
 
     @tag feature: :groups, lead?: true, people: 3
     test "create! works with inviting", %{lead: user = %Account{user_profile: profile}, people: people} do
       args = %{
         name: Faker.Team.creature(),
-        participants: people
+        invited_users: people
       }
 
       group = %Group{name: group_name} = Groups.create_group!(args, actor: user)
@@ -71,7 +80,8 @@ defmodule SecretSanta.Groups.GroupTest do
     test "invite unregistered people to existing group",
           %{lead: lead_acc = %Account{}, group: group = %Group{id: group_id}, people: people} do
       %Group{participants: participants} = group
-      assert Enum.count(participants) == 1, "expected only lead to be a participant at this time"
+      participant_count = Enum.count(participants)
+      assert participant_count == 1, "expected lead (and only lead) to be a participant at this time, but got #{Enum.count(participants)} participants"
 
       _updated_group = %Group{participants: participants}
         = Groups.invite_participants!(group, people, actor: lead_acc)

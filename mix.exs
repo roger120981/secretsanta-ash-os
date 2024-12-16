@@ -68,7 +68,12 @@ defmodule SecretSanta.MixProject do
       {:ash_authentication, "~> 4.0"},
       {:ash_authentication_phoenix, "~> 2.0"},
       {:ash_phoenix, "~> 2.0"},
-      {:ash_postgres, "~> 2.0"},
+      # {:ash_postgres, "~> 2.1"},
+      {:ash_postgres, github: "ash-project/ash_postgres", branch: "main", override: true},
+      {:ash_sql, github: "ash-project/ash_sql", branch: "main", override: true},
+
+      # cache
+      {:nebulex, "~> 2.6"},
 
       # certificates
       {:castore, "~> 1.0", override: true},
@@ -87,6 +92,9 @@ defmodule SecretSanta.MixProject do
       {:ecto_sql, "~> 3.10"},
       {:phoenix_ecto, "~> 4.4"},
       {:postgrex, ">= 0.0.0"},
+
+      # decorate
+      # {:decorator, "~> 1.4"},
 
       # email
       {:swoosh, "~> 1.3"},
@@ -117,9 +125,12 @@ defmodule SecretSanta.MixProject do
       {:opentelemetry, "~> 1.5"},
       {:opentelemetry_api, "~> 1.2"},
       {:opentelemetry_bandit, "~> 0.2"},
+      {:opentelemetry_ecto, "~> 1.2"},
       {:opentelemetry_exporter, "~> 1.6"},
       {:opentelemetry_phoenix, "~> 2.0"},
-      {:opentelemetry_ecto, "~> 1.2"},
+      {:opentelemetry_semantic_conventions, "~> 1.27"},
+
+      {:open_telemetry_decorator, "~> 1.5"},
 
       # tools
       {:credo, "~> 1.7", only: :dev},

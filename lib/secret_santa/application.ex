@@ -17,6 +17,8 @@ defmodule SecretSanta.Application do
       SecretSantaWeb.Endpoint,
     ]
 
+    setup_opentelemetry()
+
     opts = [strategy: :one_for_one, name: SecretSanta.Supervisor]
     Supervisor.start_link(children, opts)
   end
@@ -25,5 +27,28 @@ defmodule SecretSanta.Application do
   def config_change(changed, _new, removed) do
     SecretSantaWeb.Endpoint.config_change(changed, removed)
     :ok
+  end
+
+  @request_headers [
+    "x-account-id",
+    "x-group-id",
+    "x-request-id",
+  ]
+
+  defp setup_opentelemetry() do
+    OpentelemetryBandit.setup(opt_in_attrs: bandit_opt_in_attrs(), request_headers: @request_headers)
+    OpentelemetryPhoenix.setup(adapter: :bandit)
+    OpentelemetryEcto.setup([:secret_santa, :repo])
+  end
+
+  defp bandit_opt_in_attrs() do
+    [
+      :"client.port",
+      :"http.request.body.size",
+      :"http.response.body.size",
+      :"network.local.address",
+      :"network.local.port",
+      :"network.transport",
+    ]
   end
 end

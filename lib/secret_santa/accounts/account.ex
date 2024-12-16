@@ -172,6 +172,7 @@ defmodule SecretSanta.Accounts.Account do
 
     policy action_type(:read) do
       authorize_if action(:invite_participants)
+      authorize_if action(:invite_participants_by_ids)
       authorize_if expr(id == ^actor(:id))
     end
   end

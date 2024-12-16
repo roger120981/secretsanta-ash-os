@@ -63,6 +63,8 @@ defmodule SecretSanta.Groups.Group do
       change relate_actor(:lead_santa, allow_nil?: false, field: :user_profile)
       change manage_relationship(:invited_users, :participants, @manage_participants_relationship)
       # change AppendLeadToParticipants
+
+      change load [:lead_santa, :all_users, :participants, :rejections, :group_size]
     end
 
     read :read do
