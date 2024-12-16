@@ -17,7 +17,7 @@ config :secret_santa, SecretSantaWeb.Endpoint,
     cipher_suite: :strong,
     otp_app: :secret_santa,
     certfile: "priv/cert/selfsigned.pem",
-    keyfile: "priv/cert/selfsigned_key.pem"
+    keyfile: "priv/cert/selfsigned_key.pem",
   ],
   check_origin: false,
   code_reloader: true,
@@ -34,8 +34,8 @@ config :secret_santa, SecretSantaWeb.Endpoint,
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/secret_santa_web/(controllers|live|components)/.*(ex|heex|sface|js)$"
-    ]
+      ~r"lib/secret_santa_web/(controllers|live|components)/.*(ex|heex|sface|js)$",
+    ],
   ]
 
 # Enable dev routes for dashboard and mailbox
@@ -56,4 +56,3 @@ config :phoenix_live_view, :debug_heex_annotations, true
 
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
-

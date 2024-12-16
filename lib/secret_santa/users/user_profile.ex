@@ -24,11 +24,11 @@ defmodule SecretSanta.Users.UserProfile do
   alias SecretSanta.Groups.UserGroup
 
   @manage_invitation_relationship [
-      on_lookup: :relate,
-      on_no_match: {:create, :create_by_invitation},
-      on_match: :error,
-      on_missing: :error
-    ]
+    on_lookup: :relate,
+    on_no_match: {:create, :create_by_invitation},
+    on_match: :error,
+    on_missing: :error,
+  ]
 
   actions do
     get_by_id()
@@ -91,7 +91,7 @@ defmodule SecretSanta.Users.UserProfile do
       allow_nil? false
       public? true
 
-      constraints [max_length: 64]
+      constraints max_length: 64
     end
   end
 
@@ -154,7 +154,10 @@ defmodule SecretSanta.Users.UserProfile do
     table "user_profiles"
 
     references do
-      reference :account, on_delete: :delete, on_update: :update, name: "user_profile_account_fkey"
+      reference :account,
+        on_delete: :delete,
+        on_update: :update,
+        name: "user_profile_account_fkey"
     end
   end
 end

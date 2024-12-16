@@ -10,6 +10,7 @@ defmodule SecretSanta.Accounts.Secrets do
     case Application.fetch_env(:secret_santa, SecretSantaWeb.Endpoint) do
       {:ok, endpoint_config} ->
         Keyword.fetch(endpoint_config, :secret_key_base)
+
       :error ->
         :error
     end

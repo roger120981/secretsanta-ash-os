@@ -2,11 +2,11 @@ defmodule SecretSanta.NanoId do
   @constraints [
     max_length: [
       type: :non_neg_integer,
-      doc: "Enforces a maximum length on the value"
+      doc: "Enforces a maximum length on the value",
     ],
     min_length: [
       type: :non_neg_integer,
-      doc: "Enforces a minimum length on the value"
+      doc: "Enforces a minimum length on the value",
     ],
   ]
 
@@ -37,18 +37,21 @@ defmodule SecretSanta.NanoId do
 
   @impl Ash.Type
   def cast_input(nil, _), do: {:ok, nil}
+
   def cast_input(value, _) when is_binary(value) do
     common_caster(value)
   end
 
   @impl Ash.Type
   def cast_stored(nil, _), do: {:ok, nil}
+
   def cast_stored(value, _) when is_binary(value) do
     common_caster(value)
   end
 
   @impl Ash.Type
   def dump_to_native(nil, _), do: {:ok, nil}
+
   def dump_to_native(value, _) when is_binary(value) do
     common_caster(value)
   end

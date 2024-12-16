@@ -18,27 +18,33 @@ defmodule SecretSanta.Currency do
 
   @impl Ash.Type
   def cast_input(nil, _), do: {:ok, nil}
+
   def cast_input(value, _) when is_atom(value) do
     validate_and_return(value)
   end
+
   def cast_input(value, _) when is_binary(value) do
     common_caster(value)
   end
 
   @impl Ash.Type
   def cast_stored(nil, _), do: {:ok, nil}
+
   def cast_stored(value, _) when is_atom(value) do
     validate_and_return(value)
   end
+
   def cast_stored(value, _) when is_binary(value) do
     common_caster(value)
   end
 
   @impl Ash.Type
   def dump_to_native(nil, _), do: {:ok, nil}
+
   def dump_to_native(value, _) when is_atom(value) do
     validate_and_return(value)
   end
+
   def dump_to_native(value, _) when is_binary(value) do
     common_caster(value)
   end
@@ -68,11 +74,39 @@ defmodule SecretSanta.Currency do
   end
 
   @currency_map %{
-      eur: [delimiter: ",", format: "%u%n",  negative_format: "%u%n",  precision: 0, separator: ".", unit: "€"],
-      gbp: [delimiter: ",", format: "%u%n",  negative_format: "%u%n",  precision: 0, separator: ".", unit: "£"],
-      sek: [delimiter: " ", format: "%n %u", negative_format: "%n %u", precision: 0, separator: ",", unit: "kr"],
-      usd: [delimiter: ",", format: "%u%n",  negative_format: "%u%n",  precision: 0, separator: ".", unit: "$"],
-    }
+    eur: [
+      delimiter: ",",
+      format: "%u%n",
+      negative_format: "%u%n",
+      precision: 0,
+      separator: ".",
+      unit: "€",
+    ],
+    gbp: [
+      delimiter: ",",
+      format: "%u%n",
+      negative_format: "%u%n",
+      precision: 0,
+      separator: ".",
+      unit: "£",
+    ],
+    sek: [
+      delimiter: " ",
+      format: "%n %u",
+      negative_format: "%n %u",
+      precision: 0,
+      separator: ",",
+      unit: "kr",
+    ],
+    usd: [
+      delimiter: ",",
+      format: "%u%n",
+      negative_format: "%u%n",
+      precision: 0,
+      separator: ".",
+      unit: "$",
+    ],
+  }
 
   @currency_set @currency_map |> Map.keys() |> MapSet.new()
 

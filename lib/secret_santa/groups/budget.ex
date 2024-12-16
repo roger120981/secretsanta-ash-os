@@ -15,14 +15,14 @@ defmodule SecretSanta.Groups.Budget do
       public? true
       allow_nil? true
 
-      constraints [min: 1]
+      constraints min: 1
     end
 
     attribute :max, :decimal do
       public? true
       allow_nil? false
 
-      constraints [min: 1]
+      constraints min: 1
     end
 
     attribute :currency, :currency do
@@ -42,12 +42,16 @@ defimpl String.Chars, for: SecretSanta.Groups.Budget do
 
   def to_string(nil),
     do: "n/a"
+
   def to_string(%Budget{min: nil, max: nil}),
     do: "n/a"
+
   def to_string(%Budget{min: min, max: nil, currency: currency}),
     do: "Min #{number_to_currency(min, Map.fetch!(@opts, currency))}"
+
   def to_string(%Budget{min: nil, max: max, currency: currency}),
     do: number_to_currency(max, Map.fetch!(@opts, currency))
+
   def to_string(%Budget{min: min, max: max, currency: currency}) do
     [
       min

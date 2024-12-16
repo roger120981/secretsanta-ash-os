@@ -7,8 +7,9 @@ end
 missing_env = fn env -> "environment variable #{env} is missing." end
 
 if config_env() == :prod do
-  sender_email = System.get_env("SENDER_EMAIL") ||
-    raise """
+  sender_email =
+    System.get_env("SENDER_EMAIL") ||
+      raise """
       #{missing_env.("SENDER_EMAIL")}
       For example: noreply@secret.santa
       """
@@ -19,9 +20,9 @@ if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||
       raise """
-        #{missing_env.("DATABASE_URL")}
-        For example: ecto://USER:PASS@HOST/DATABASE
-        """
+      #{missing_env.("DATABASE_URL")}
+      For example: ecto://USER:PASS@HOST/DATABASE
+      """
 
   maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
 
@@ -39,9 +40,9 @@ if config_env() == :prod do
   secret_key_base =
     System.get_env("SECRET_KEY_BASE") ||
       raise """
-        #{missing_env.("SECRET_KEY_BASE")}
-        You can generate one by calling: mix phx.gen.secret
-        """
+      #{missing_env.("SECRET_KEY_BASE")}
+      You can generate one by calling: mix phx.gen.secret
+      """
 
   host = System.get_env("PHX_HOST") || "example.com"
   port = String.to_integer(System.get_env("PORT") || "4000")

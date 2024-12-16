@@ -10,7 +10,7 @@ defmodule SecretSanta.Accounts.Senders.SendMagicLink do
 
   @impl AshAuthentication.Sender
   def send(user, token, _) do
-    url =  url(~p"/a/auth/account/magic_link/?token=#{token}")
+    url = url(~p"/a/auth/account/magic_link/?token=#{token}")
 
     user
     |> MagicLink.email(url)

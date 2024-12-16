@@ -2,6 +2,7 @@ import Config
 
 # Ash
 config :ash, :default_belongs_to_type, :string
+
 config :ash,
   custom_types: [
     currency: SecretSanta.Currency,
@@ -46,8 +47,9 @@ config :esbuild,
   ]
 
 # PetalComponents
-config :petal_components, :error_translator_function,
-  {SecretSantaWeb.ErrorHelpers, :translate_error}
+config :petal_components,
+       :error_translator_function,
+       {SecretSantaWeb.ErrorHelpers, :translate_error}
 
 # Spark configuration
 config :spark, :formatter,

@@ -8,20 +8,26 @@ require Logger
 defmodule Seeder do
   def maybe_drop(module) do
     if function_exported?(seed_module, :drop, 0) do
-      Logger.info("[#{inspect module, pretty: true}} Dropping...")
+      Logger.info("[#{inspect(module, pretty: true)}} Dropping...")
       seed_module.drop()
     else
-      Logger.info("[#{inspect module, pretty: true}] Can't drop seeds as the module doesn't export `drop/0`")
+      Logger.info(
+        "[#{inspect(module, pretty: true)}] Can't drop seeds as the module doesn't export `drop/0`"
+      )
+
       {:error, :invalid_seed_module}
     end
   end
 
   def maybe_seed(module) do
     if function_exported?(seed_module, :seed, 0) do
-      Logger.info("[#{inspect module, pretty: true}} Seeding...")
+      Logger.info("[#{inspect(module, pretty: true)}} Seeding...")
       seed_module.seed()
     else
-      Logger.info("[#{inspect module, pretty: true}] Can't seed as the module doesn't export `seed/0`")
+      Logger.info(
+        "[#{inspect(module, pretty: true)}] Can't seed as the module doesn't export `seed/0`"
+      )
+
       {:error, :invalid_seed_module}
     end
   end

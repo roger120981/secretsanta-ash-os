@@ -102,34 +102,37 @@ defmodule SecretSanta.Groups.UserGroup do
       primary_key? true
       public? true
       allow_nil? false
-      constraints [max_length: 12]
+      constraints max_length: 12
     end
 
     attribute :group_id, :string do
       primary_key? true
       public? true
       allow_nil? false
-      constraints [max_length: 12]
+      constraints max_length: 12
     end
 
     attribute :hint_for_santa, :string do
       public? true
       allow_nil? true
-      constraints [max_length: 256]
+      constraints max_length: 256
     end
 
     timestamp :invited_at,
       allow_nil?: true,
       public?: true,
       default: &DateTime.utc_now/0
+
     timestamp :accepted_at,
       allow_nil?: true,
       public?: true,
       default: nil
+
     timestamp :rejected_at,
       allow_nil?: true,
       public?: true,
       default: nil
+
     timestamp :hint_requested_at,
       allow_nil?: true,
       public?: true,

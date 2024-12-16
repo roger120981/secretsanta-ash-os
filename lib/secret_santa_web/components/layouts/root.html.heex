@@ -8,7 +8,7 @@
     <link rel="dns-prefetch" href="https://unpkg.com/" />
 
     <.live_title suffix=" · 🎅🏽">
-      <%= assigns[:page_title] || "Secret Santa" %>
+      {assigns[:page_title] || "Secret Santa"}
     </.live_title>
     <script defer src="https://unpkg.com/@alpinejs/collapse@3.x.x/dist/cdn.min.js" />
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" />
@@ -16,6 +16,6 @@
     <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"} />
   </head>
   <body class="bg-white antialiased">
-    <%= @inner_content %>
+    {@inner_content}
   </body>
 </html>

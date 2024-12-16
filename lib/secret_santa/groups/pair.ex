@@ -14,7 +14,7 @@ defmodule SecretSanta.Groups.Pair do
       allow_nil? false
       description "The ID of this pairing."
       default &SecretSanta.Id.generate/0
-      constraints [max_length: 12]
+      constraints max_length: 12
     end
 
     timestamps()
@@ -23,14 +23,14 @@ defmodule SecretSanta.Groups.Pair do
       public? true
       allow_nil? false
       description "The ID of the participant in the group."
-      constraints [max_length: 12]
+      constraints max_length: 12
     end
 
     attribute :target_id, :string do
       public? true
       allow_nil? false
       description "The ID of the target participant in the group."
-      constraints [max_length: 12]
+      constraints max_length: 12
     end
   end
 

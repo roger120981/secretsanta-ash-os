@@ -34,20 +34,20 @@ defmodule SecretSanta.Groups.Group do
   ]
 
   @manage_participants_relationship [
-      on_lookup: :relate,
-      on_no_match: {:create, :create_by_invitation},
-      on_match: :ignore,
-      on_missing: :ignore
-    ]
+    on_lookup: :relate,
+    on_no_match: {:create, :create_by_invitation},
+    on_match: :ignore,
+    on_missing: :ignore,
+  ]
 
   actions do
     get_by_id prepare: [
-      load: [:lead_santa, :all_users, :participants]
-    ]
+                load: [:lead_santa, :all_users, :participants],
+              ]
 
     list_actions prepare: [
-      load: [:lead_santa, :all_users, :participants, :rejections]
-    ]
+                   load: [:lead_santa, :all_users, :participants, :rejections],
+                 ]
 
     soft_delete()
 
@@ -130,14 +130,14 @@ defmodule SecretSanta.Groups.Group do
       allow_nil? false
       public? true
 
-      constraints [max_length: 64]
+      constraints max_length: 64
     end
 
     attribute :desc, :string do
       allow_nil? true
       public? true
 
-      constraints [min_length: 32, max_length: 2048]
+      constraints min_length: 32, max_length: 2048
     end
 
     attribute :budget, Budget do
@@ -151,7 +151,7 @@ defmodule SecretSanta.Groups.Group do
       allow_nil? true
       public? true
 
-      constraints [max_length: 512]
+      constraints max_length: 512
     end
 
     attribute :starts_on, :date do
@@ -167,10 +167,6 @@ defmodule SecretSanta.Groups.Group do
     end
   end
 
-  aggregates do
-    count :group_size, :participants
-  end
-
   relationships do
     belongs_to :lead_santa, UserProfile do
       public? true
@@ -179,10 +175,11 @@ defmodule SecretSanta.Groups.Group do
 
     has_many :all_users, UserGroup do
       public? true
+
       description """
-        The user-association relationship underlying all many-to-many
-        relationships between groups and users.
-        """
+      The user-association relationship underlying all many-to-many
+      relationships between groups and users.
+      """
 
       destination_attribute :group_id
     end
@@ -234,7 +231,10 @@ defmodule SecretSanta.Groups.Group do
     # base_filter_sql "deleted_at IS NULL"
 
     references do
-      reference :lead_santa, on_delete: :delete, on_update: :update, name: "group_to_lead_santa_fkey"
+      reference :lead_santa,
+        on_delete: :delete,
+        on_update: :update,
+        name: "group_to_lead_santa_fkey"
     end
   end
 
@@ -244,5 +244,9 @@ defmodule SecretSanta.Groups.Group do
 
     short_name :group
     plural_name :groups
+  end
+
+  aggregates do
+    count :group_size, :participants
   end
 end

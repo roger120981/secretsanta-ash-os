@@ -36,7 +36,11 @@ defmodule SecretSanta.Application do
   ]
 
   defp setup_opentelemetry() do
-    OpentelemetryBandit.setup(opt_in_attrs: bandit_opt_in_attrs(), request_headers: @request_headers)
+    OpentelemetryBandit.setup(
+      opt_in_attrs: bandit_opt_in_attrs(),
+      request_headers: @request_headers
+    )
+
     OpentelemetryPhoenix.setup(adapter: :bandit)
     OpentelemetryEcto.setup([:secret_santa, :repo])
   end

@@ -10,6 +10,7 @@ defmodule SecretSanta.Checks.ActorIsNil do
   def match?(nil, _context, _opts) do
     true
   end
+
   def match?(_actor, _context, _opts) do
     false
   end

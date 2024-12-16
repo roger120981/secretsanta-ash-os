@@ -23,11 +23,11 @@ defmodule SecretSantaWeb.Router do
     get "/", PageController, :home
 
     scope "/a" do
-        # sign_in_route(register_path: "/register", reset_path: "/reset")
-        sign_in_route(on_mount: [{SecretSantaWeb.LiveUserAuth, :live_no_user}])
-        sign_out_route AuthController
-        auth_routes_for SecretSanta.Accounts.Account, to: AuthController
-        reset_route []
+      # sign_in_route(register_path: "/register", reset_path: "/reset")
+      sign_in_route(on_mount: [{SecretSantaWeb.LiveUserAuth, :live_no_user}])
+      sign_out_route AuthController
+      auth_routes_for SecretSanta.Accounts.Account, to: AuthController
+      reset_route []
     end
 
     scope "/" do

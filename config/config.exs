@@ -3,16 +3,16 @@ import Config
 import_config "deps.exs"
 
 read_version_file = fn ->
-    __DIR__
-    |> Path.join("../VERSION")
-    |> File.read!()
-    |> String.trim()
-  end
+  __DIR__
+  |> Path.join("../VERSION")
+  |> File.read!()
+  |> String.trim()
+end
 
 resolve_git_sha_env = fn ->
-    System.get_env("GIT_VERSION_SHA", "dev")
-    |> String.trim()
-  end
+  System.get_env("GIT_VERSION_SHA", "dev")
+  |> String.trim()
+end
 
 config :secret_santa,
   ash_domains: [
@@ -44,8 +44,7 @@ config :secret_santa, SecretSantaWeb.Endpoint,
 #
 # For production it's recommended to configure a different adapter
 # at the `config/runtime.exs`.
-config :secret_santa, SecretSanta.Mailer,
-  adapter: Swoosh.Adapters.Local
+config :secret_santa, SecretSanta.Mailer, adapter: Swoosh.Adapters.Local
 
 metadata = [
   # Core

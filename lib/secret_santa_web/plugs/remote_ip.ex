@@ -16,4 +16,3 @@ defmodule SecretSantaWeb.Plugs.RemoteIp do
     conn
   end
 end
-

@@ -11,23 +11,30 @@ defmodule SecretSanta.Groups do
   resources do
     resource Group do
       define :create_group, action: :create
+
       define :get_group_by_id,
         action: :get_by_id,
         args: [:id]
+
       define :list_groups,
         action: :list
+
       define :invite_participants,
         action: :invite_participants,
         args: [:participants]
+
       define :invite_participants_by_ids,
         action: :invite_participants_by_ids,
         args: [:ids]
+
       define :uninvite_participants,
         action: :uninvite_participants,
         args: [:participants]
+
       define :uninvite_participants_by_ids,
         action: :uninvite_participants_by_ids,
         args: [:ids]
+
       define :update_group, action: :update
       define :shuffle, action: :shuffle
       define :delete_group, action: :soft_delete
@@ -41,10 +48,13 @@ defmodule SecretSanta.Groups do
       define :get_user_group_by_ids,
         action: :get_by_group_and_user_ids,
         args: [:group_id, :user_id]
+
       define :list_user_groups, action: :list
+
       define :list_user_groups_by_group_id,
         action: :list_by_group_id,
         args: [:group_id]
+
       define :list_user_groups_by_user_id,
         action: :list_by_user_id,
         args: [:user_id]
@@ -71,6 +81,7 @@ defmodule SecretSanta.Groups do
       {:error, :not_implemented}
     end
   end
+
   def group_ready?(group_id) do
     with {:ok, group = %Group{}} <- get_group_by_id(group_id) do
       group_ready?(group)
@@ -84,6 +95,7 @@ defmodule SecretSanta.Groups do
   def get_hints_of_group(_group = %Group{}) do
     {:error, :not_implemented}
   end
+
   def get_hints_of_group(_) do
     {:error, :bad_argument}
   end

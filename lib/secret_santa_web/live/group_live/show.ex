@@ -16,9 +16,9 @@ defmodule SecretSantaWeb.GroupLive.Show do
     group = Groups.get_group_by_id!(id)
 
     {:noreply,
-      socket
-      |> assign(:page_title, page_title(socket.assigns.live_action))
-      |> assign(:group, group)}
+     socket
+     |> assign(:page_title, page_title(socket.assigns.live_action))
+     |> assign(:group, group)}
   end
 
   # ! private functions

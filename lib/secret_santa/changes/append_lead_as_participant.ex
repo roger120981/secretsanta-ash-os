@@ -23,11 +23,11 @@ defmodule SecretSanta.Changes.AppendLeadAsParticipant do
   # ! private functions
 
   defp hook(_changeset, _record = %Group{id: group_id}, actor) do
-    with {:ok, _lead_user_group}
-        <- Groups.create_accepted_user_group(
-            user_group_args(actor, group_id),
-            actor: actor
-          ) do
+    with {:ok, _lead_user_group} <-
+           Groups.create_accepted_user_group(
+             user_group_args(actor, group_id),
+             actor: actor
+           ) do
       Groups.get_group_by_id(group_id, actor: actor)
     end
   end

@@ -31,15 +31,15 @@ defmodule SecretSanta.Changes.ShuffleGroup do
     |> case do
       {:ok, pairs} ->
         {:ok,
-          changeset
-          |> Ash.Changeset.change_attribute(:pairs, pairs)}
+         changeset
+         |> Ash.Changeset.change_attribute(:pairs, pairs)}
 
       {:error, :invalid_pairings} ->
         raise RuntimeError, "should never be here! Fix this bug"
     end
   end
 
-  defp shuffle(user_ids = [element|_]) when is_list(user_ids) and is_binary(element) do
+  defp shuffle(user_ids = [element | _]) when is_list(user_ids) and is_binary(element) do
     shuffle_p(user_ids)
   end
 
@@ -50,32 +50,41 @@ defmodule SecretSanta.Changes.ShuffleGroup do
     |> case do
       result = {:ok, _pairings} ->
         result
+
       {:error, :invalid_pairings} ->
         Logger.info("Reshuffling as somebody got themselves")
         shuffle_p(user_ids)
+
       other_error ->
-        Logger.error("Unknown error occurred: #{inspect other_error, pretty: true}", crash_reason: other_error)
+        Logger.error("Unknown error occurred: #{inspect(other_error, pretty: true)}",
+          crash_reason: other_error
+        )
+
         {:error, :unknown_error}
     end
   end
 
   defp pairing(user_ids) do
-    [first|rest] = user_ids = Enum.shuffle(user_ids)
+    [first | rest] = user_ids = Enum.shuffle(user_ids)
+
     Enum.zip(user_ids, rest ++ [first])
-    |> Enum.reduce([],
+    |> Enum.reduce(
+      [],
       fn {lhs, rhs}, acc ->
         with {:ok, pair} <- Pair.create(%{participant_id: lhs, target_id: rhs}) do
-          [pair|acc]
+          [pair | acc]
         end
-    end)
+      end
+    )
   end
 
   defp validate_pairings(pairings) do
     pairings
-    |> Enum.any?(& &1.target_id == &1.participant_id)
+    |> Enum.any?(&(&1.target_id == &1.participant_id))
     |> case do
       true ->
         {:error, :invalid_pairings}
+
       false ->
         {:ok, pairings}
     end

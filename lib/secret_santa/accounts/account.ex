@@ -34,6 +34,25 @@ defmodule SecretSanta.Accounts.Account do
 
   @repo_table_name "accounts"
 
+  authentication do
+    strategies do
+      # https://hexdocs.pm/ash_authentication/dsl-ashauthentication-strategy-magiclink.html#authentication-strategies-magic_link
+      magic_link do
+        identity_field :email
+        registration_enabled? true
+        # request_action_name :request_magic_link
+
+        sender SendMagicLink
+      end
+    end
+
+    tokens do
+      enabled? true
+      token_resource Token
+      signing_secret Secrets
+    end
+  end
+
   actions do
     # Repeated-provided actions
     get_by_id prepare: [load: [:user_profile]]
@@ -117,29 +136,6 @@ defmodule SecretSanta.Accounts.Account do
     end
   end
 
-  authentication do
-    strategies do
-      # https://hexdocs.pm/ash_authentication/dsl-ashauthentication-strategy-magiclink.html#authentication-strategies-magic_link
-      magic_link do
-        identity_field :email
-        registration_enabled? true
-        # request_action_name :request_magic_link
-
-        sender SendMagicLink
-      end
-    end
-
-    tokens do
-      enabled? true
-      token_resource Token
-      signing_secret Secrets
-    end
-  end
-
-  identities do
-    identity :email, [:email]
-  end
-
   relationships do
     has_one :user_profile, UserProfile do
       allow_nil? true
@@ -182,5 +178,9 @@ defmodule SecretSanta.Accounts.Account do
 
     table @repo_table_name
     base_filter_sql "deleted_at IS NULL"
+  end
+
+  identities do
+    identity :email, [:email]
   end
 end

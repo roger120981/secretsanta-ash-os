@@ -12,8 +12,10 @@ defmodule SecretSanta.Accounts.Emails.MagicLink do
       email(acc, url)
     end
   end
+
   def email(%Account{email: email, user_profile: profile = %UserProfile{}}, url) do
-    body = """
+    body =
+      """
       Hello #{profile.name}!
 
       Use the following link to login:

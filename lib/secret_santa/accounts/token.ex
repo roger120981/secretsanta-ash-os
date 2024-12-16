@@ -11,16 +11,16 @@ defmodule SecretSanta.Accounts.Token do
       AshAuthentication.TokenResource,
     ]
 
-  postgres do
-    repo SecretSanta.Repo
-    table "account_tokens"
-  end
-
   # If using policies, add the following bypass:
   policies do
     # AshAuthentication itself
     bypass AshAuthentication.Checks.AshAuthenticationInteraction do
       authorize_if always()
     end
+  end
+
+  postgres do
+    repo SecretSanta.Repo
+    table "account_tokens"
   end
 end
