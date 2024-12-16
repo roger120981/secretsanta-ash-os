@@ -34,7 +34,7 @@ defmodule SecretSanta.MixProject do
       read_version_file(),
       resolve_git_sha_env(),
     ]
-    |> Stream.reject(&is_nil(&1) or &1 == "")
+    |> Stream.reject(&(is_nil(&1) or &1 == ""))
     |> Enum.join("-")
   end
 
@@ -48,7 +48,7 @@ defmodule SecretSanta.MixProject do
         strip_beams: true,
         quiet: false,
         steps: [:assemble, :tar],
-      ]
+      ],
     ]
   end
 
@@ -129,7 +129,6 @@ defmodule SecretSanta.MixProject do
       {:opentelemetry_exporter, "~> 1.6"},
       {:opentelemetry_phoenix, "~> 2.0"},
       {:opentelemetry_semantic_conventions, "~> 1.27"},
-
       {:open_telemetry_decorator, "~> 1.5"},
 
       # tools

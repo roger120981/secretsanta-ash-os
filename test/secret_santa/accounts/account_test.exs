@@ -23,7 +23,9 @@ defmodule SecretSanta.Accounts.AccountTest do
 
     @tag feature: :accounts, lead?: true
     test "forbidden when already signed in", %{lead: lead} do
-      assert_raise Ash.Error.Forbidden, fn -> Accounts.create_by_sign_up!(params!(Account), actor: lead) end
+      assert_raise Ash.Error.Forbidden, fn ->
+        Accounts.create_by_sign_up!(params!(Account), actor: lead)
+      end
     end
   end
 end

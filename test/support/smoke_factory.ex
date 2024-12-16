@@ -69,6 +69,7 @@ defmodule SecretSantaTest.Factory do
     context
     |> Keyword.put_new(:lead, lead)
   end
+
   defp add_lead?(context, _) do
     context
   end
@@ -78,14 +79,18 @@ defmodule SecretSantaTest.Factory do
   defp add_group?(context, nil) do
     context
   end
+
   defp add_group?(context, settings) do
     budget =
       case settings do
         %{amount: amount, currency: currency} ->
           %{max: amount, currency: currency}
+
         map when is_map(map) ->
           map
-        true -> nil
+
+        true ->
+          nil
       end
 
     context = make_sure_exists(context, :lead, &add_lead?/2)
@@ -106,7 +111,8 @@ defmodule SecretSantaTest.Factory do
     lead = Keyword.fetch!(context, :lead)
     group = Keyword.fetch!(context, :group)
 
-    guests = create_users(count)
+    guests =
+      create_users(count)
       |> Enum.map(&Accounts.create_by_sign_up!/1)
 
     guest_profiles = Enum.map(guests, & &1.user_profile)
@@ -114,7 +120,7 @@ defmodule SecretSantaTest.Factory do
     updated_group =
       %Group{
         id: group_id,
-        participants: participants
+        participants: participants,
       } = Groups.invite_participants!(group, guest_profiles, actor: lead)
 
     for participant <- participants do
@@ -126,6 +132,7 @@ defmodule SecretSantaTest.Factory do
     |> Keyword.put(:group, updated_group)
     |> Keyword.put(:guests, guests)
   end
+
   defp add_guests?(context, _) do
     context
   end
@@ -137,6 +144,7 @@ defmodule SecretSantaTest.Factory do
     context
     |> Keyword.put(:people, people)
   end
+
   defp add_people?(context, _) do
     context
   end
@@ -148,6 +156,7 @@ defmodule SecretSantaTest.Factory do
   end
 
   defp create_users(count, variant \\ nil)
+
   defp create_users(count, :invitation) do
     UserProfile
     |> params!(count: count, variant: :invitation)

@@ -19,7 +19,7 @@ strict_module_layout_order = [
   :public_macro,
   :private_fun,
   :private_guard,
-  :private_macro
+  :private_macro,
 ]
 
 strict_module_layout_ignore = [
@@ -27,7 +27,7 @@ strict_module_layout_ignore = [
   :callback,
   :optional_callback,
   :behaviour,
-  :callback_impl
+  :callback_impl,
 ]
 
 %{
@@ -55,9 +55,9 @@ strict_module_layout_ignore = [
           "apps/*/lib/",
           "apps/*/src/",
           "apps/*/test/",
-          "apps/*/web/"
+          "apps/*/web/",
         ],
-        excluded: [~r"/_build/", ~r"/deps/", ~r"/node_modules/"]
+        excluded: [~r"/_build/", ~r"/deps/", ~r"/node_modules/"],
       },
       #
       # Load and configure plugins here:
@@ -97,8 +97,7 @@ strict_module_layout_ignore = [
           #
           {Credo.Check.Consistency.ExceptionNames, []},
           {Credo.Check.Consistency.LineEndings, []},
-          {Credo.Check.Consistency.ParameterPatternMatching,
-            [force: :before]},
+          {Credo.Check.Consistency.ParameterPatternMatching, [force: :before]},
           {Credo.Check.Consistency.SpaceAroundOperators, []},
           {Credo.Check.Consistency.SpaceInParentheses, []},
           {Credo.Check.Consistency.TabsOrSpaces, []},
@@ -113,7 +112,7 @@ strict_module_layout_ignore = [
            [
              priority: :low,
              if_nested_deeper_than: 2,
-             if_called_more_often_than: 1
+             if_called_more_often_than: 1,
            ]},
           {Credo.Check.Design.TagFIXME, []},
           # You can also customize the exit_status of each check.
@@ -192,7 +191,7 @@ strict_module_layout_ignore = [
           {Credo.Check.Warning.UnusedRegexOperation, []},
           {Credo.Check.Warning.UnusedStringOperation, []},
           {Credo.Check.Warning.UnusedTupleOperation, []},
-          {Credo.Check.Warning.WrongTestFileExtension, []}
+          {Credo.Check.Warning.WrongTestFileExtension, []},
         ],
         disabled: [
           #
@@ -235,16 +234,15 @@ strict_module_layout_ignore = [
           {Credo.Check.Warning.LeakyEnvironment, []},
           {Credo.Check.Warning.MapGetUnsafePass, []},
           {Credo.Check.Warning.MixEnv, []},
-          {Credo.Check.Warning.UnsafeToAtom, []}
+          {Credo.Check.Warning.UnsafeToAtom, []},
 
           # {Credo.Check.Refactor.MapInto, []},
 
           #
           # Custom checks can be created using `mix credo.gen.check`.
           #
-        ]
-      }
-    }
-  ]
+        ],
+      },
+    },
+  ],
 }
-

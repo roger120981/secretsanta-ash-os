@@ -22,6 +22,7 @@ defmodule SecretSanta.CurrencyTest do
       test_currency_p(fun, expected, expected)
     end
   end
+
   defp test_currency(currencies, expected) when is_list(currencies) do
     for currency <- currencies do
       test_currency(currency, expected)
@@ -30,9 +31,9 @@ defmodule SecretSanta.CurrencyTest do
 
   describe "Currencies can be serialised and deserialised." do
     for {k, v} <- [
-                    {:gbp, ["GBP", "GBp", "GbP", "gBP", "Gbp", "gbP", "gBp", "gbp"]},
-                    {:sek, ["SEK", "SEk", "SeK", "sEK", "Sek", "seK", "sEk", "sek"]},
-                  ] do
+          {:gbp, ["GBP", "GBp", "GbP", "gBP", "Gbp", "gbP", "gBp", "gbp"]},
+          {:sek, ["SEK", "SEk", "SeK", "sEK", "Sek", "seK", "sEk", "sek"]},
+        ] do
       test "#{k} is supported" do
         test_currency(unquote(v), unquote(k))
       end

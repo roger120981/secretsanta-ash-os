@@ -91,8 +91,7 @@ defmodule Repeated.Search do
   defmacro search_calculation(calculation_name, fields) do
     question_marks =
       1..Enum.count(fields)
-      |> Enum.map(fn _ -> "?" end)
-      |> Enum.join(", ")
+      |> Enum.map_join(", ", fn _ -> "?" end)
 
     greatest = "greatest(#{question_marks})"
     trgm_calls = build_trgm_calls(fields)

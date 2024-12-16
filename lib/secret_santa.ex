@@ -3,7 +3,6 @@ defmodule SecretSanta do
   A simple module to access some meta data.
   """
 
-
   @doc false
   def about() do
     %{
