@@ -8,6 +8,7 @@ defmodule Repeated.ListActions do
   """
   @spec list_actions(opts :: Keyword.t()) :: Macro.t()
   defmacro list_actions(opts \\ []) do
+    opts = Macro.prewalk(opts, &Macro.expand(&1, __CALLER__))
     is_list_primary_true? = Keyword.get(opts, :list_primary?, false)
     is_list_paginated_primary_true? = Keyword.get(opts, :list_paginated_primary?, false)
 

@@ -31,8 +31,8 @@ defmodule SecretSanta.Users.UserProfile do
   ]
 
   actions do
-    get_by_id()
-    list_actions()
+    get_by_id prepare: [load: [:account]]
+    list_actions prepare: [load: [:account]]
     soft_delete()
 
     create :create do

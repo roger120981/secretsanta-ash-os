@@ -16,8 +16,7 @@ defmodule SecretSanta.Changes.AppendLeadAsParticipant do
 
   @impl true
   def change(changeset, _opts, _context = %{actor: actor}) do
-    changeset
-    |> Ash.Changeset.after_action(&hook(&1, &2, actor))
+    Ash.Changeset.after_action(changeset, &hook(&1, &2, actor))
   end
 
   # ! private functions

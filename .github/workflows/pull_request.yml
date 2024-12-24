@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
     - dev
+    - rel/*
   workflow_dispatch:
 
 concurrency:

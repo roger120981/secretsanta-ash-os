@@ -16,16 +16,16 @@ defmodule SecretSanta.Changes.ShuffleGroup do
   end
 
   @impl true
-  def atomic(changeset, _opts, _context) do
+  def atomic(changeset, [data_key: data_key], _context) do
     changeset
-    |> change_p()
+    |> change_p(data_key)
   end
 
   # ! private functions
 
-  defp change_p(changeset) do
+  defp change_p(changeset, data_key) do
     changeset
-    |> Ash.Changeset.get_data(:participants)
+    |> Ash.Changeset.get_data(data_key)
     |> Enum.map(& &1.id)
     |> shuffle()
     |> case do
@@ -34,9 +34,16 @@ defmodule SecretSanta.Changes.ShuffleGroup do
          changeset
          |> Ash.Changeset.change_attribute(:pairs, pairs)}
 
+      {:error, :empty_list} ->
+        {:ok, changeset}
+
       {:error, :invalid_pairings} ->
         raise RuntimeError, "should never be here! Fix this bug"
     end
+  end
+
+  defp shuffle([]) do
+    {:error, :empty_list}
   end
 
   defp shuffle(user_ids = [element | _]) when is_list(user_ids) and is_binary(element) do
@@ -67,7 +74,8 @@ defmodule SecretSanta.Changes.ShuffleGroup do
   defp pairing(user_ids) do
     [first | rest] = user_ids = Enum.shuffle(user_ids)
 
-    Enum.zip(user_ids, rest ++ [first])
+    user_ids
+    |> Enum.zip(rest ++ [first])
     |> Enum.reduce(
       [],
       fn {lhs, rhs}, acc ->

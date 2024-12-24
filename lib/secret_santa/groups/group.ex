@@ -19,7 +19,7 @@ defmodule SecretSanta.Groups.Group do
   use Repeated.SoftDelete
   use Repeated.Timestamps
 
-  # alias SecretSanta.Changes.AppendLeadAsParticipant
+  alias SecretSanta.Changes.AppendLeadAsParticipant
   alias SecretSanta.Changes.ShuffleGroup
   alias SecretSanta.Groups.Budget
   alias SecretSanta.Groups.UserGroup
@@ -40,14 +40,22 @@ defmodule SecretSanta.Groups.Group do
     on_missing: :ignore,
   ]
 
-  actions do
-    get_by_id prepare: [
-                load: [:lead_santa, :all_users, :participants],
-              ]
+  @default_loads [
+    :all_user_assocs,
+    :all_users,
+    :invitee_count,
+    :invitees,
+    :lead_santa,
+    :participant_count,
+    :participants,
+    :rejection_count,
+    :rejections,
+    :user_count,
+  ]
 
-    list_actions prepare: [
-                   load: [:lead_santa, :all_users, :participants, :rejections],
-                 ]
+  actions do
+    get_by_id prepare: [load: @default_loads]
+    list_actions prepare: [load: @default_loads]
 
     soft_delete()
 
@@ -61,10 +69,8 @@ defmodule SecretSanta.Groups.Group do
       end
 
       change relate_actor(:lead_santa, allow_nil?: false, field: :user_profile)
-      change manage_relationship(:invited_users, :participants, @manage_participants_relationship)
-      # change AppendLeadToParticipants
-
-      change load [:lead_santa, :all_users, :participants, :rejections, :group_size]
+      change manage_relationship(:invited_users, :all_users, @manage_participants_relationship)
+      change AppendLeadAsParticipant
     end
 
     read :read do
@@ -81,6 +87,8 @@ defmodule SecretSanta.Groups.Group do
 
       argument :participants, {:array, :map}, allow_nil?: false
 
+      change load(@default_loads)
+      change load(all_users: [:account])
       change manage_relationship(:participants, :all_users, @manage_participants_relationship)
     end
 
@@ -111,7 +119,16 @@ defmodule SecretSanta.Groups.Group do
     update :shuffle do
       primary? false
       accept []
-      change ShuffleGroup
+      require_atomic? false
+
+      change load([:can_shuffle])
+
+      validate fn changeset, ctx ->
+                 Ash.Changeset.get_data(changeset, :can_shuffle)
+               end,
+               before_action?: true
+
+      change {ShuffleGroup, [data_key: :participants]}
     end
 
     destroy :destroy do
@@ -121,9 +138,7 @@ defmodule SecretSanta.Groups.Group do
 
   attributes do
     nanoid()
-
     timestamps()
-
     deleted_at()
 
     attribute :name, :string do
@@ -173,7 +188,7 @@ defmodule SecretSanta.Groups.Group do
       allow_nil? false
     end
 
-    has_many :all_users, UserGroup do
+    has_many :all_user_assocs, UserGroup do
       public? true
 
       description """
@@ -184,23 +199,44 @@ defmodule SecretSanta.Groups.Group do
       destination_attribute :group_id
     end
 
-    many_to_many :participants, UserProfile do
+    many_to_many :all_users, UserProfile do
       public? true
-      join_relationship :all_users
+      join_relationship :all_user_assocs
+
+      source_attribute_on_join_resource :group_id
+      destination_attribute_on_join_resource :user_id
+    end
+
+    many_to_many :invitees, UserProfile do
+      public? true
+      join_relationship :all_user_assocs
 
       source_attribute_on_join_resource :group_id
       destination_attribute_on_join_resource :user_id
 
-      filter expr(not is_nil(parent(all_users.accepted_at)))
+      filter expr(
+               is_nil(parent(all_user_assocs.accepted_at)) and
+                 is_nil(parent(all_user_assocs.rejected_at))
+             )
+    end
+
+    many_to_many :participants, UserProfile do
+      public? true
+      join_relationship :all_user_assocs
+
+      source_attribute_on_join_resource :group_id
+      destination_attribute_on_join_resource :user_id
+
+      filter expr(not is_nil(parent(all_user_assocs.accepted_at)))
     end
 
     many_to_many :rejections, UserProfile do
       public? true
-      join_relationship :all_users
+      join_relationship :all_user_assocs
 
       source_attribute_on_join_resource :group_id
       destination_attribute_on_join_resource :user_id
-      filter expr(not is_nil(parent(all_users.rejected_at)))
+      filter expr(not is_nil(parent(all_user_assocs.rejected_at)))
     end
   end
 
@@ -247,6 +283,13 @@ defmodule SecretSanta.Groups.Group do
   end
 
   aggregates do
-    count :group_size, :participants
+    count :invitee_count, :invitees
+    count :participant_count, :participants
+    count :rejection_count, :rejections
+    count :user_count, :all_users
+  end
+
+  calculations do
+    calculate :can_shuffle, :boolean, expr(participants > 2)
   end
 end

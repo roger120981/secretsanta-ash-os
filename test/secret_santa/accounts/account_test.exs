@@ -6,8 +6,6 @@ defmodule SecretSanta.Accounts.AccountTest do
 
   alias SecretSanta.Accounts
   alias SecretSanta.Accounts.Account
-  alias SecretSanta.Groups
-  alias SecretSanta.Groups.Group
 
   setup ctx do
     SecretSantaTest.Factory.prepare_test_context([], ctx)

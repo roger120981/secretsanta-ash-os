@@ -34,6 +34,8 @@ defmodule SecretSanta.Accounts.Account do
 
   @repo_table_name "accounts"
 
+  @default_load [:user_profile]
+
   authentication do
     strategies do
       # https://hexdocs.pm/ash_authentication/dsl-ashauthentication-strategy-magiclink.html#authentication-strategies-magic_link
@@ -55,9 +57,9 @@ defmodule SecretSanta.Accounts.Account do
 
   actions do
     # Repeated-provided actions
-    get_by_id prepare: [load: [:user_profile]]
-    get_by :email, prepare: [load: [:user_profile]]
-    list_actions prepare: [load: [:user_profile]]
+    get_by_id prepare: [load: @default_load]
+    get_by :email, prepare: [load: @default_load]
+    list_actions prepare: [load: @default_load]
     soft_delete()
 
     create :create_by_sign_up do
@@ -84,8 +86,6 @@ defmodule SecretSanta.Accounts.Account do
 
     read :read do
       primary? true
-
-      prepare build(load: [:user_profile])
     end
 
     read :request_magic_link do
@@ -94,7 +94,7 @@ defmodule SecretSanta.Accounts.Account do
       end
 
       prepare AshAuthentication.Strategy.MagicLink.RequestPreparation
-      prepare build(load: [:user_profile])
+      prepare build(load: @default_load)
 
       filter expr(email == ^arg(:email))
     end

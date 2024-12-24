@@ -7,7 +7,9 @@ defmodule Repeated.ListByIds do
   Creates two new `:read` actions: `:list` and `:list_paginated`.
   """
   @spec list_by_ids() :: Macro.t()
-  defmacro list_by_ids() do
+  defmacro list_by_ids(opts \\ []) do
+    opts = Macro.prewalk(opts, &Macro.expand(&1, __CALLER__))
+
     id_type = :nanoid
 
     quote do

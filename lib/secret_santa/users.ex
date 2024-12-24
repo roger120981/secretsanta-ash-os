@@ -7,6 +7,9 @@ defmodule SecretSanta.Users do
 
   resources do
     resource UserProfile do
+      define :create_user_profile_by_invitation,
+        action: :create_by_invitation
+
       define :get_user_profile_by_id,
         action: :get_by_id,
         args: [:id]

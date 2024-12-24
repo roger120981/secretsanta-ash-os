@@ -17,6 +17,7 @@ defmodule Repeated.GetById do
   """
   @spec get_by_id(opts :: Keyword.t()) :: Macro.t()
   defmacro get_by_id(opts \\ []) do
+    opts = Macro.prewalk(opts, &Macro.expand(&1, __CALLER__))
     {id_field, opts} = Keyword.pop(opts, :field, :id)
 
     Repeated.GetBy.get_by_block(id_field, [{:name, :id} | opts])

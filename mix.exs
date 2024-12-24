@@ -68,9 +68,7 @@ defmodule SecretSanta.MixProject do
       {:ash_authentication, "~> 4.0"},
       {:ash_authentication_phoenix, "~> 2.0"},
       {:ash_phoenix, "~> 2.0"},
-      # {:ash_postgres, "~> 2.1"},
-      {:ash_postgres, github: "ash-project/ash_postgres", branch: "main", override: true},
-      {:ash_sql, github: "ash-project/ash_sql", branch: "main", override: true},
+      {:ash_postgres, "~> 2.4"},
 
       # cache
       {:nebulex, "~> 2.6"},
@@ -94,7 +92,7 @@ defmodule SecretSanta.MixProject do
       {:postgrex, ">= 0.0.0"},
 
       # decorate
-      # {:decorator, "~> 1.4"},
+      {:decorator, "~> 1.4"},
 
       # email
       {:swoosh, "~> 1.3"},
@@ -127,16 +125,21 @@ defmodule SecretSanta.MixProject do
       {:opentelemetry_bandit, "~> 0.2"},
       {:opentelemetry_ecto, "~> 1.2"},
       {:opentelemetry_exporter, "~> 1.6"},
+      {:opentelemetry_finch, "~> 0.2"},
       {:opentelemetry_phoenix, "~> 2.0"},
-      {:opentelemetry_semantic_conventions, "~> 1.27"},
+      {:opentelemetry_semantic_conventions, "~> 1.27", override: true},
+      {:opentelemetry_tesla, "~> 2.4"},
       {:open_telemetry_decorator, "~> 1.5"},
+
+      # {:opentelemetry_dataloader, "~> 0.1"},
+      # {:opentelemetry_nebulex, "~> 0.1"},
 
       # tools
       {:credo, "~> 1.7", only: :dev},
       {:esbuild, "~> 0.7", runtime: Mix.env() == :dev},
       {:faker, ">= 0.0.0", only: [:test]},
       {:floki, ">= 0.36.2", only: :test},
-      {:freedom_formatter, ">= 2.0.0", only: :dev},
+      {:freedom_formatter, ">= 2.0.0", only: [:dev, :test]},
       {:hammox, "~> 0.7.0", only: :test},
       {:heroicons,
        github: "tailwindlabs/heroicons",

@@ -4,7 +4,9 @@ defmodule SecretSanta.Groups.GroupTest do
   use SecretSanta.DataCase, async: true
   use SecretSantaTest.Factory
 
+  alias SecretSanta.Accounts
   alias SecretSanta.Accounts.Account
+  alias SecretSanta.Actors
   alias SecretSanta.Groups
   alias SecretSanta.Groups.Group
   alias SecretSanta.Groups.UserGroup
@@ -15,6 +17,11 @@ defmodule SecretSanta.Groups.GroupTest do
     SecretSantaTest.Factory.prepare_test_context([], ctx)
   end
 
+  defp assert_empty(list, name) do
+    assert Enum.empty?(list) == true,
+           "expected #{inspect(name)} to be empty, but it is: #{inspect(list, pretty: true)}"
+  end
+
   describe "Groups.create!" do
     @tag feature: :groups, lead?: true
     test "create works without inviting", %{
@@ -23,18 +30,18 @@ defmodule SecretSanta.Groups.GroupTest do
       args = %{name: Faker.Team.creature()}
 
       created_group =
-        %Group{id: group_id, group_size: group_size, participants: participants} =
+        %Group{id: group_id, participant_count: participant_count, participants: participants} =
         Groups.create_group!(args, actor: user)
 
-      actual_group_size = Enum.count(participants)
+      actual_participant_count = Enum.count(participants)
       assert created_group.name == args[:name]
       assert created_group.lead_santa_id == profile_id
 
-      assert actual_group_size == group_size,
-             "the number of participants and group_size are not equal: #{actual_group_size} != #{group_size}"
+      assert actual_participant_count == participant_count,
+             "the number of participants and participant_count are not equal: #{actual_participant_count} != #{participant_count}"
 
-      assert group_size == 1,
-             "expected lead and only lead to be a participant, but got #{group_size} participants"
+      assert participant_count == 1,
+             "expected lead and only lead to be a participant, but got #{participant_count} participants"
 
       refetched_group = Groups.get_group_by_id!(group_id, actor: user)
 
@@ -65,40 +72,97 @@ defmodule SecretSanta.Groups.GroupTest do
     @tag feature: :groups, group?: true, people: @people_count
     test "invite unregistered people to existing group",
          %{lead: lead_acc = %Account{}, group: group = %Group{id: group_id}, people: people} do
-      %Group{participants: participants} = group
+      %Group{
+        all_users: all_users,
+        participant_count: participant_count,
+        participants: participants,
+      } = group
+
+      expected_user_count = @people_count + 1
+
+      user_count = Enum.count(all_users)
       participant_count = Enum.count(participants)
+
+      assert Enum.count(people) == @people_count,
+             "did not get the expected amount of people: #{@people_count} != #{Enum.count(people)}"
+
+      assert user_count == 1,
+             "expected lead (and only lead) to be a all_users at this time, but got #{Enum.count(all_users)} users"
 
       assert participant_count == 1,
              "expected lead (and only lead) to be a participant at this time, but got #{Enum.count(participants)} participants"
 
-      _updated_group =
-        %Group{participants: participants} =
-        Groups.invite_participants!(group, people, actor: lead_acc)
+      assert participant_count == participant_count
+
+      updated_group =
+        %Group{
+          all_users: all_users,
+          participant_count: participant_count,
+          invitees: invitees,
+          participants: participants,
+        } =
+        Groups.invite_participants!(group, people, actor: lead_acc, load: [all_users: [:account]])
+
+      accounts = Accounts.list_accounts!(actor: Actors.admin())
+      user_profiles = Users.list_user_profiles!(actor: Actors.admin())
+
+      assert Enum.count(accounts) == expected_user_count
+      assert Enum.count(user_profiles) == expected_user_count
+
+      for user <- all_users do
+        assert {:ok, %Account{}} =
+                 Accounts.get_by_id(user.account_id, actor: Actors.admin()) |> dbg()
+      end
 
       # Lead can read Group
-      %Group{id: ^group_id} = Groups.get_group_by_id!(group_id, actor: lead_acc)
+      %Group{id: ^group_id} =
+        Groups.get_group_by_id!(group_id, actor: lead_acc, load: [all_users: :account])
 
-      group_size = @people_count + 1
+      assert Enum.count(all_users) == expected_user_count
+      refute Enum.empty?(invitees), ":invitees is empty when it ought to be #{@people_count}"
+
+      invitee_ids = Enum.map(invitees, & &1.id)
+      invitees = Enum.filter(all_users, &(&1.id in invitee_ids))
 
       # All guests can read Group
-      for participant = %UserProfile{account: participant_account} <- participants do
-        participant = %{participant | account: nil}
-        actor = %Account{participant_account | user_profile: participant}
+      for invitee = %UserProfile{account: invitee_account, id: invitee_id} <- invitees do
+        invitee = %{invitee | account: nil}
+        actor = %Account{invitee_account | user_profile: invitee}
 
-        %Group{id: ^group_id, group_size: ^group_size, participants: participants} =
-          Groups.get_group_by_id!(group_id, actor: actor)
+        %Group{
+          id: ^group_id,
+          invitees: invitees,
+          participants: participants,
+        } = Groups.get_group_by_id!(group_id, actor: actor)
 
         [%Group{id: ^group_id}] = Groups.list_groups!(actor: actor)
 
-        assert Enum.count(participants) == group_size
+        %UserGroup{group_id: ^group_id, user_id: invitee_id, accepted_at: accepted_at} =
+          Groups.get_user_group_by_ids!(group_id, invitee_id)
+          |> Groups.accept_invitation!()
+
+        %Group{participant_count: participant_count, participants: participants} =
+          Groups.get_group_by_id!(group_id, actor: actor)
+
+        assert not is_nil(accepted_at), "the field :accepted_at is still nil after accepting!"
+        assert Enum.count(participants) == participant_count
       end
 
-      # All guests are in the participants relationship
-      assert Enum.count(participants) == group_size
+      final_group =
+        %Group{
+          id: ^group_id,
+          all_users: users,
+          invitees: invitees,
+          user_count: user_count,
+          participants: participants,
+          rejections: rejections,
+        } = Groups.get_group_by_id!(group.id, actor: lead_acc)
 
-      assert %Group{
-               id: ^group_id,
-             } = Groups.get_group_by_id!(group.id, actor: lead_acc)
+      dbg(final_group.all_user_assocs)
+
+      assert_empty(invitees, :invitees)
+      assert_empty(rejections, :rejections)
+      # assert Enum.count(users) == Enum.count(participants) == user_count == expected_user_count
     end
 
     @tag feature: :groups, group?: true, people: 1
@@ -256,7 +320,10 @@ defmodule SecretSanta.Groups.GroupTest do
   describe "Groups.shuffle/1" do
     @tag feature: :groups, guests: 3
     test "can shuffle", %{lead: lead = %_{}, group: group = %Group{}} do
-      %Group{pairs: pairs} = Groups.shuffle!(group, actor: lead)
+      %Group{pairs: pairs} =
+        group
+        |> dbg()
+        |> Groups.shuffle!(actor: lead)
 
       assert Enum.count(pairs) == 4
 
