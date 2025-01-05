@@ -6,18 +6,24 @@ defmodule Repeated.ListByIds do
   @doc """
   Creates two new `:read` actions: `:list` and `:list_paginated`.
   """
-  @spec list_by_ids() :: Macro.t()
+  @spec list_by_ids(opts :: Keyword.t()) :: Macro.t()
   defmacro list_by_ids(opts \\ []) do
     opts = Macro.prewalk(opts, &Macro.expand(&1, __CALLER__))
 
     id_type = :nanoid
+    prepare_build? = Keyword.has_key?(opts, :prepare)
+    prepare_opts = Keyword.get(opts, :prepare)
 
-    quote do
+    quote generated: true, location: :keep do
       read :list_by_ids do
         primary? false
 
         argument :ids, {:array, unquote(id_type)} do
           allow_nil? false
+        end
+
+        if unquote(prepare_build?) do
+          prepare build(unquote(prepare_opts))
         end
 
         quote do
@@ -31,6 +37,10 @@ defmodule Repeated.ListByIds do
 
         argument :ids, {:array, unquote(id_type)} do
           allow_nil? false
+        end
+
+        if unquote(prepare_build?) do
+          prepare build(unquote(prepare_opts))
         end
 
         quote do
@@ -47,7 +57,7 @@ defmodule Repeated.ListByIds do
 
     quote generated: true, location: :keep do
       require unquote(module)
-      import unquote(module), only: [list_by_ids: 0]
+      import unquote(module), only: [list_by_ids: 0, list_by_ids: 1]
     end
   end
 end

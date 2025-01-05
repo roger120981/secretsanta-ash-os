@@ -14,6 +14,7 @@ defmodule SecretSanta.Accounts do
       define :get_by_email, action: :get_by_email, args: [:email]
       define :get_by_id, action: :get_by_id, args: [:id]
       define :list_accounts, action: :list
+      define :list_accounts_by_ids, action: :list_by_ids, args: [:ids]
       define :list_accounts_paginated, action: :list_paginated
       define :update_account, action: :update
       define :delete_account, action: :soft_delete

@@ -5,16 +5,8 @@ defmodule Repeated.GetBy do
   """
 
   @doc """
-  Creates a new `get_by` action for the passed `identity`.
-  with the name of the action being `:get_by_<opts.name>`.
-
-  The following code is injected in-place:
-
-    ```elixir
-    read :get_by_<opts.name> do
-      get_by <identity>
-    end
-    ```
+  Creates a new `get_by` action for the passed `identity`, with the name of the
+  action being `:get_by_<opts.name>`
   """
   @spec get_by_block(identity :: atom(), opts :: Keyword.t()) :: Macro.t()
   def get_by_block(identity, opts) do

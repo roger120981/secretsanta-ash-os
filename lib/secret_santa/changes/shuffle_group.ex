@@ -46,6 +46,14 @@ defmodule SecretSanta.Changes.ShuffleGroup do
     {:error, :empty_list}
   end
 
+  defp shuffle([_one]) do
+    {:error, :too_few_users}
+  end
+
+  defp shuffle([_one, _two]) do
+    {:error, :too_few_users}
+  end
+
   defp shuffle(user_ids = [element | _]) when is_list(user_ids) and is_binary(element) do
     shuffle_p(user_ids)
   end

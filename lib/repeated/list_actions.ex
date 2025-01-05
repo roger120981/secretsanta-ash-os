@@ -19,7 +19,7 @@ defmodule Repeated.ListActions do
     prepare_build? = Keyword.has_key?(opts, :prepare)
     prepare_opts = Keyword.get(opts, :prepare)
 
-    quote do
+    quote generated: true, location: :keep do
       read :list do
         primary? unquote(is_list_primary_true?)
 

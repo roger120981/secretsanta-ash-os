@@ -121,12 +121,7 @@ defmodule SecretSanta.Groups.Group do
       accept []
       require_atomic? false
 
-      change load([:can_shuffle])
 
-      validate fn changeset, ctx ->
-                 Ash.Changeset.get_data(changeset, :can_shuffle)
-               end,
-               before_action?: true
 
       change {ShuffleGroup, [data_key: :participants]}
     end
@@ -247,12 +242,12 @@ defmodule SecretSanta.Groups.Group do
     end
 
     policy action_type(:read) do
-      authorize_if relates_to_actor_via(:lead_santa, field: :user_profile)
-      authorize_if relates_to_actor_via(:participants, field: :user_profile)
+      authorize_if relates_to_actor_via([:lead_santa, :account])
+      authorize_if relates_to_actor_via([:all_users, :account])
     end
 
     policy action_type([:update, :destroy]) do
-      authorize_if relates_to_actor_via(:lead_santa, field: :user_profile)
+      authorize_if relates_to_actor_via([:lead_santa, :account])
     end
 
     policy action_type(:create) do
@@ -290,6 +285,6 @@ defmodule SecretSanta.Groups.Group do
   end
 
   calculations do
-    calculate :can_shuffle, :boolean, expr(participants > 2)
+    calculate :can_shuffle, :boolean, expr(participant_count > 2)
   end
 end

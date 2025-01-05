@@ -22,7 +22,7 @@ ash_policy_debug_enabled? =
 if ash_policy_debug_enabled? do
   config :ash, :policies, show_policy_breakdowns?: true
   config :ash, :policies, log_policy_breakdowns: :error
-  config :ash, :policies, log_successful_policy_breakdowns: :error
+  # config :ash, :policies, log_successful_policy_breakdowns: false
 end
 
 ash_authentication_debug_enabled? =

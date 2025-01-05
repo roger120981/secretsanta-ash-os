@@ -5,10 +5,14 @@ defmodule SecretSantaTest.Factory do
 
   alias SecretSanta.Accounts
   alias SecretSanta.Accounts.Account
+  alias SecretSanta.Actors
   alias SecretSanta.Groups
   alias SecretSanta.Groups.Budget
   alias SecretSanta.Groups.Group
+  alias SecretSanta.Groups.UserGroup
   alias SecretSanta.Users.UserProfile
+
+  @admin Actors.admin()
 
   # Accounts Domain
   factory Account do
@@ -117,19 +121,23 @@ defmodule SecretSantaTest.Factory do
 
     guest_profiles = Enum.map(guests, & &1.user_profile)
 
-    updated_group =
-      %Group{
-        id: group_id,
-        participants: participants,
-      } = Groups.invite_participants!(group, guest_profiles, actor: lead)
+    %Group{
+      id: group_id,
+      invitees: invitees,
+    } = Groups.invite_participants!(group, guest_profiles, actor: lead)
 
-    for participant <- participants do
-      Groups.get_user_group_by_ids!(group_id, participant.id)
-      |> Groups.accept_invitation!()
+    invitees = Ash.load!(invitees, :account, actor: @admin)
+
+    for invitee <- invitees do
+      %UserGroup{accepted_at: accepted_at} =
+        Groups.get_user_group_by_ids!(group_id, invitee.id)
+        |> Groups.accept_invitation!(actor: invitee.account)
+
+      if accepted_at == nil, do: raise "failed to accept invitation!"
     end
 
     context
-    |> Keyword.put(:group, updated_group)
+    |> Keyword.put(:group, Groups.get_group_by_id!(group_id, actor: @admin))
     |> Keyword.put(:guests, guests)
   end
 
@@ -139,10 +147,7 @@ defmodule SecretSantaTest.Factory do
 
   # no deps
   defp add_people?(context, count) when is_integer(count) and count > 0 do
-    people = create_users(count, :invitation)
-
-    context
-    |> Keyword.put(:people, people)
+    Keyword.put(context, :people, create_users(count, :invitation))
   end
 
   defp add_people?(context, _) do

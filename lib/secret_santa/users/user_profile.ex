@@ -16,6 +16,7 @@ defmodule SecretSanta.Users.UserProfile do
   use Repeated.GetById
   use Repeated.NanoId
   use Repeated.ListActions
+  use Repeated.ListByIds
   use Repeated.SoftDelete
   use Repeated.Timestamps
 
@@ -33,6 +34,7 @@ defmodule SecretSanta.Users.UserProfile do
   actions do
     get_by_id prepare: [load: [:account]]
     list_actions prepare: [load: [:account]]
+    list_by_ids prepare: [load: [:account]]
     soft_delete()
 
     create :create do
@@ -58,16 +60,6 @@ defmodule SecretSanta.Users.UserProfile do
 
     read :read do
       primary? true
-    end
-
-    read :list_by_ids do
-      primary? false
-
-      argument :ids, {:array, :nanoid} do
-        allow_nil? false
-      end
-
-      filter expr(id in ^arg(:ids))
     end
 
     update :update do
@@ -112,7 +104,8 @@ defmodule SecretSanta.Users.UserProfile do
 
     many_to_many :groups, Group do
       public? true
-      through UserGroup
+      join_relationship :group_memberships
+
       source_attribute_on_join_resource :user_id
       destination_attribute_on_join_resource :group_id
     end
@@ -141,6 +134,7 @@ defmodule SecretSanta.Users.UserProfile do
     policy action_type(:read) do
       authorize_if relates_to_actor_via([:groups, :lead_santa, :account])
       authorize_if relates_to_actor_via([:groups, :participants, :account])
+      authorize_if relates_to_actor_via([:groups, :rejections, :account])
     end
 
     policy action_type([:update, :destroy]) do

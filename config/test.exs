@@ -47,3 +47,6 @@ config :logger, level: :warning
 
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
+
+# Logger
+config :logger, :console, format: "$time [$level]\n$metadata\n$message\n"

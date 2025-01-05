@@ -18,6 +18,7 @@ defmodule SecretSanta.Accounts.Account do
   use Repeated.GetById
   use Repeated.NanoId
   use Repeated.ListActions
+  use Repeated.ListByIds
   use Repeated.SoftDelete
   use Repeated.Timestamps
 
@@ -60,6 +61,7 @@ defmodule SecretSanta.Accounts.Account do
     get_by_id prepare: [load: @default_load]
     get_by :email, prepare: [load: @default_load]
     list_actions prepare: [load: @default_load]
+    list_by_ids()
     soft_delete()
 
     create :create_by_sign_up do
